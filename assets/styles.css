@@ -21,9 +21,8 @@ body {
 }
 
 .browser-shell {
-  min-height: 100%;
-  display: grid;
-  grid-template-rows: 52px 1fr;
+  height: 52px;
+  display: block;
   background: #050505;
 }
 
@@ -75,47 +74,6 @@ input:focus {
   padding: 0 12px;
 }
 
-.content {
-  position: relative;
-  min-height: 0;
-  background: #050505;
-}
-
-#page {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: #ffffff;
-}
-
-.start {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 22px;
-  padding: 32px;
-  background: #050505;
-}
-
-.start.hidden {
-  display: none;
-}
-
-.brand {
-  color: #ffffff;
-  font-size: 38px;
-  font-weight: 700;
-}
-
-#start-address {
-  max-width: 720px;
-  height: 48px;
-  border-radius: 8px;
-  background: #101010;
-}
-
 @media (max-width: 560px) {
   .toolbar {
     grid-template-columns: 32px 32px 32px 32px minmax(72px, 1fr) 42px;
@@ -126,9 +84,5 @@ input:focus {
   button,
   input {
     height: 34px;
-  }
-
-  .brand {
-    font-size: 30px;
   }
 }

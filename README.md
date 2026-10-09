@@ -25,4 +25,4 @@ cargo run
 
 ## Notes
 
-This first version keeps the toolbar and page area inside one WebView shell. Pages are loaded in an embedded frame so the toolbar remains visible. Some sites block being displayed in frames; a future two-WebView layout can remove that limitation.
+This first version uses one small WebView for the toolbar and a second WebView for page content, so pages load in the browser engine itself while the controls remain visible.
