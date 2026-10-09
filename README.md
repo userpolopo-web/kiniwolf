@@ -2,6 +2,14 @@
 
 Kiniwolf Browser is a lightweight desktop browser built in Rust with Wry and WebView2. It keeps the interface minimal with a black, gray, and white theme while supporting address entry, search, back, forward, reload, and home navigation.
 
+## Portugues (Brasil)
+
+O Kiniwolf é um navegador leve e minimalista desenvolvido em Rust. O instalador Windows ainda não possui assinatura digital de um editor reconhecido, por isso o SmartScreen pode exibir um aviso de aplicativo desconhecido. Esse aviso, por si só, não significa que o arquivo contém vírus. Baixe somente pelas [releases oficiais](https://github.com/userpolopo-web/kiniwolf/releases). Se o antivírus detectar uma ameaça específica, não ignore o alerta.
+
+## English (US)
+
+Kiniwolf is a lightweight, minimalist browser built with Rust. The Windows installer does not yet have a recognized publisher's digital signature, so SmartScreen may display an unrecognized app warning. This warning alone does not mean the file contains a virus. Download only from the [official releases](https://github.com/userpolopo-web/kiniwolf/releases). If your antivirus detects a specific threat, do not ignore the alert.
+
 ## Prerequisites
 
 - Rust stable toolchain.
