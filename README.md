@@ -21,7 +21,7 @@ Windows installers are currently unsigned by a publisher certificate. System tru
 
 Profile locations: Windows `%LOCALAPPDATA%\Kiniwolf`; macOS `~/Library/Application Support/Kiniwolf`; Linux `$XDG_DATA_HOME/Kiniwolf` or `~/.local/share/Kiniwolf`. WKWebView manages website storage through macOS rather than the Windows-style profile directory.
 
-`.github/workflows/installers.yml` builds and tests on all four runners when pushing to `master`. Artifacts are available under GitHub Actions. Pushing a version tag matching Cargo.toml (for example `v0.1.0`) publishes all installers and SHA-256 checksums to GitHub Releases after every platform succeeds.
+`.github/workflows/installers.yml` builds and tests on all four runners for pull requests, manual runs and version tags. Artifacts are available under GitHub Actions. Pushing a version tag matching Cargo.toml (for example `v0.1.0`) publishes all installers and SHA-256 checksums to GitHub Releases after every platform succeeds. Linux also receives a startup test under Xvfb. Windows builds link the C runtime statically to avoid a separate Visual C++ runtime installation.
 
 Local packaging after `cargo build --release --locked`:
 

@@ -2,7 +2,6 @@ name: Build installers
 
 on:
   push:
-    branches: [master]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
@@ -48,6 +47,18 @@ jobs:
         run: cargo test --locked
       - name: Build
         run: cargo build --release --locked
+      - name: Linux startup smoke test
+        if: runner.os == 'Linux'
+        env:
+          WEBKIT_DISABLE_DMABUF_RENDERER: '1'
+        run: |
+          status=0
+          xvfb-run -a timeout 10s target/release/kiniwolf-browser > startup.log 2>&1 || status=$?
+          if [ "$status" -ne 124 ]; then
+            cat startup.log
+            echo "Browser exited before the startup test completed (status $status)" >&2
+            exit 1
+          fi
       - name: Package Linux
         if: runner.os == 'Linux'
         run: bash packaging/linux/package.sh "$APP_VERSION"
