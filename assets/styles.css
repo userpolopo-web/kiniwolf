@@ -1,0 +1,101 @@
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #050505;
+  color: #f5f5f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #050505;
+}
+
+.browser-shell {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: 52px 1fr;
+  background: #050505;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 36px 36px 36px 36px minmax(120px, 1fr) 52px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  background: #111111;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+button,
+input {
+  height: 36px;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  background: #1b1b1b;
+  color: #f7f7f7;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover,
+input:focus {
+  border-color: #777777;
+  outline: none;
+}
+
+.icon-button {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.go-button {
+  font-weight: 600;
+}
+
+#address,
+#start-address {
+  width: 100%;
+  padding: 0 12px;
+}
+
+.start {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 22px;
+  padding: 32px;
+}
+
+.brand {
+  color: #ffffff;
+  font-size: 38px;
+  font-weight: 700;
+}
+
+#start-address {
+  max-width: 720px;
+  height: 48px;
+  border-radius: 8px;
+  background: #101010;
+}
+
+@media (max-width: 560px) {
+  .toolbar {
+    grid-template-columns: 32px 32px 32px 32px minmax(80px, 1fr) 44px;
+    gap: 5px;
+  }
+}

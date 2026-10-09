@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-home="{{HOME_URL}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kiniwolf Browser</title>
+  <!-- styles.css -->
+  <style>{{STYLES}}</style>
+</head>
+<body>
+  <main class="browser-shell" data-home="{{HOME_URL}}">
+    <form class="toolbar" id="toolbar" autocomplete="off">
+      <button class="icon-button" id="back" type="button" title="Back" aria-label="Back">‹</button>
+      <button class="icon-button" id="forward" type="button" title="Forward" aria-label="Forward">›</button>
+      <button class="icon-button" id="reload" type="button" title="Reload" aria-label="Reload">↻</button>
+      <button class="icon-button" id="home" type="button" title="Home" aria-label="Home">⌂</button>
+      <input id="address" name="address" type="text" spellcheck="false" placeholder="Search or enter address">
+      <button class="go-button" id="go" type="submit">Go</button>
+    </form>
+    <section class="start">
+      <div class="brand">Kiniwolf</div>
+      <input id="start-address" type="text" spellcheck="false" placeholder="Search or enter address">
+    </section>
+  </main>
+  <!-- shell.js -->
+  <script>{{SCRIPT}}</script>
+</body>
+</html>
