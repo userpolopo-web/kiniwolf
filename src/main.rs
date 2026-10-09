@@ -1,3 +1,8 @@
+#![cfg_attr(
+    all(target_os = "windows", not(debug_assertions)),
+    windows_subsystem = "windows"
+)]
+
 mod assets;
 mod browser;
 mod settings;
@@ -17,6 +22,48 @@ use tao::{
 };
 use wry::{Rect, WebContext, WebView, WebViewBuilder};
 const HOME: &str = "https://duckduckgo.com";
+
+struct WebViewHost {
+    window: Window,
+    #[cfg(target_os = "linux")]
+    fixed: gtk::Fixed,
+}
+
+impl std::ops::Deref for WebViewHost {
+    type Target = Window;
+    fn deref(&self) -> &Window {
+        &self.window
+    }
+}
+
+impl WebViewHost {
+    fn new(window: Window) -> Self {
+        #[cfg(target_os = "linux")]
+        {
+            use gtk::prelude::*;
+            use tao::platform::unix::WindowExtUnix;
+            let fixed = gtk::Fixed::new();
+            window
+                .default_vbox()
+                .expect("GTK window container")
+                .pack_start(&fixed, true, true, 0);
+            fixed.show_all();
+            Self { window, fixed }
+        }
+        #[cfg(not(target_os = "linux"))]
+        Self { window }
+    }
+
+    fn build_webview(&self, builder: WebViewBuilder<'_>) -> wry::Result<WebView> {
+        #[cfg(target_os = "linux")]
+        {
+            use wry::WebViewBuilderExtUnix;
+            builder.build_gtk(&self.fixed)
+        }
+        #[cfg(not(target_os = "linux"))]
+        builder.build_as_child(&self.window)
+    }
+}
 
 #[derive(Debug)]
 enum Message {
@@ -52,7 +99,7 @@ impl Browser {
     fn activate(
         &mut self,
         id: u64,
-        window: &Window,
+        window: &WebViewHost,
         proxy: &EventLoopProxy<Message>,
     ) -> wry::Result<()> {
         if !self.tabs.iter().any(|t| t.id == id) {
@@ -75,7 +122,7 @@ impl Browser {
             let title = proxy.clone();
             let ipc = proxy.clone();
             let popup_source = tab.popup_source.clone();
-            let view = WebViewBuilder::with_web_context(&mut self.context)
+            let builder = WebViewBuilder::with_web_context(&mut self.context)
                 .with_url(&tab.url)
                 .with_bounds(bounds(window, height, false))
                 .with_initialization_script(include_str!("../assets/content.js"))
@@ -102,8 +149,8 @@ impl Browser {
                     // navigation from about:blank. Reopening its URL loses that context.
                     popup_source.store(true, Ordering::Relaxed);
                     true
-                })
-                .build_as_child(window)?;
+                });
+            let view = window.build_webview(builder)?;
             configure_passwords(&view, self.settings.save_passwords)?;
             tab.view = Some(view);
         }
@@ -115,7 +162,7 @@ impl Browser {
     fn add(
         &mut self,
         url: String,
-        window: &Window,
+        window: &WebViewHost,
         proxy: &EventLoopProxy<Message>,
     ) -> wry::Result<()> {
         let id = self.next;
@@ -137,13 +184,13 @@ impl Browser {
             .collect();
         toolbar.evaluate_script(&format!(
             "window.renderBrowser({});",
-            json!({"tabs":tabs,"active":self.active,"settings":self.settings,"panel":self.panel})
+            json!({"tabs":tabs,"active":self.active,"settings":self.settings,"panel":self.panel,"passwords_supported":cfg!(target_os = "windows")})
         ))
     }
     fn command(
         &mut self,
         value: Value,
-        window: &Window,
+        window: &WebViewHost,
         proxy: &EventLoopProxy<Message>,
         toolbar: &WebView,
     ) -> wry::Result<()> {
@@ -279,16 +326,17 @@ fn main() -> wry::Result<()> {
         .with_min_inner_size(LogicalSize::new(440.0, 400.0))
         .build(&event_loop)
         .expect("create window");
+    let window = WebViewHost::new(window);
     let toolbar_proxy = proxy.clone();
-    let toolbar = WebViewBuilder::new()
+    let toolbar_builder = WebViewBuilder::new()
         .with_html(assets::browser_shell_html(HOME))
         .with_bounds(bounds(&window, 94, true))
         .with_ipc_handler(move |request| {
             if let Ok(value) = serde_json::from_str(request.body()) {
                 let _ = toolbar_proxy.send_event(Message::Command(value));
             }
-        })
-        .build_as_child(&window)?;
+        });
+    let toolbar = window.build_webview(toolbar_builder)?;
     std::fs::create_dir_all(settings::data_dir()).expect("create browser profile");
     let mut browser = Browser {
         tabs: vec![],

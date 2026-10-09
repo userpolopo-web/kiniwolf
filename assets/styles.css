@@ -100,6 +100,7 @@ input:focus {
 button:focus-visible { outline: 2px solid white; outline-offset: -2px; }
 #settings { padding: 14px 18px; height: 156px; border-bottom: 1px solid #444; background: #191919; }
 #settings[hidden] { display: none; }
+#settings label[hidden] { display: none; }
 #settings label { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 42px; font-size: 14px; }
 #settings input { width: 18px; height: 18px; accent-color: #aaa; flex-shrink: 0; }
 #status { display: block; font-size: 12px; color: #ccc; margin-top: 10px; }

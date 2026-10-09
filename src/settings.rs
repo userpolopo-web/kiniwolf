@@ -18,10 +18,17 @@ impl Default for Settings {
 }
 
 pub fn data_dir() -> PathBuf {
-    std::env::var_os("LOCALAPPDATA")
+    #[cfg(target_os = "windows")]
+    let root = std::env::var_os("LOCALAPPDATA").map(PathBuf::from);
+    #[cfg(target_os = "macos")]
+    let root = std::env::var_os("HOME")
+        .map(|home| PathBuf::from(home).join("Library/Application Support"));
+    #[cfg(target_os = "linux")]
+    let root = std::env::var_os("XDG_DATA_HOME")
+        .filter(|value| PathBuf::from(value).is_absolute())
         .map(PathBuf::from)
-        .unwrap_or_else(std::env::temp_dir)
-        .join("Kiniwolf")
+        .or_else(|| std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".local/share")));
+    root.unwrap_or_else(std::env::temp_dir).join("Kiniwolf")
 }
 
 impl Settings {

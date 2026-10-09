@@ -31,6 +31,8 @@ window.renderBrowser = state => {
   document.getElementById('settings-button').setAttribute('aria-expanded', String(state.panel));
   document.getElementById('memory-saver').checked = state.settings.memory_saver;
   document.getElementById('save-passwords').checked = state.settings.save_passwords;
+  document.getElementById('save-passwords').disabled = !state.passwords_supported;
+  document.getElementById('save-passwords').closest('label').hidden = !state.passwords_supported;
 };
 
 document.getElementById('new-tab').onclick = () => post({type:'new-tab'});
@@ -63,9 +65,9 @@ window.kiniwolfNavigate = (url) => {
 };
 
 window.addEventListener("keydown", (event) => {
-  if (event.ctrlKey && event.key.toLowerCase() === 't') { event.preventDefault(); post({type:'new-tab'}); }
-  if (event.ctrlKey && event.key.toLowerCase() === 'w') { event.preventDefault(); post({type:'close-tab', id:currentTab}); }
-  if (event.ctrlKey && event.key.toLowerCase() === "l") {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 't') { event.preventDefault(); post({type:'new-tab'}); }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'w') { event.preventDefault(); post({type:'close-tab', id:currentTab}); }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "l") {
     event.preventDefault();
     address.focus();
     address.select();
@@ -81,7 +83,7 @@ window.addEventListener("keydown", (event) => {
     post({ type: "forward" });
   }
 
-  if (event.ctrlKey && event.key.toLowerCase() === "r") {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "r") {
     event.preventDefault();
     post({ type: "reload" });
   }

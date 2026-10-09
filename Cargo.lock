@@ -1054,6 +1054,7 @@ dependencies = [
 name = "kiniwolf-browser"
 version = "0.1.0"
 dependencies = [
+ "gtk",
  "serde",
  "serde_json",
  "tao",

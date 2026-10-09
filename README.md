@@ -6,6 +6,31 @@ Kiniwolf Browser is a lightweight desktop browser built in Rust with Wry and Web
 
 - Rust stable toolchain.
 - Microsoft Edge WebView2 Runtime on Windows.
+- Linux: GTK 3 and WebKitGTK 4.1 (Ubuntu 22.04+); building requires their development packages.
+- macOS 11+: WKWebView is provided by macOS.
+
+## Installers
+
+Download installers from https://github.com/userpolopo-web/kiniwolf/releases:
+
+- Windows x64: run `Kiniwolf-VERSION-windows-x64-setup.exe`. Installs per user, adds a Start menu entry, offers a desktop shortcut and includes an uninstaller. If WebView2 is missing, setup installs it using Microsoft's signed bootstrapper; this step needs internet access.
+- macOS: open the `arm64` DMG for Apple Silicon or `x86_64` DMG for Intel, then drag Kiniwolf Browser to Applications. Bundles are ad-hoc signed, without an Apple Developer ID or notarization.
+- Ubuntu/Debian amd64 with WebKitGTK 4.1: install the DEB using `sudo apt install ./Kiniwolf-VERSION-linux-amd64.deb`. This resolves runtime dependencies and adds a menu entry. Remove with `sudo apt remove kiniwolf-browser`.
+
+Windows installers are currently unsigned by a publisher certificate. System trust prompts may appear. Uninstalling preserves local profiles and settings. Native password saving is available on Windows only; Linux and macOS use their platform web engines without Kiniwolf password-manager integration.
+
+Profile locations: Windows `%LOCALAPPDATA%\Kiniwolf`; macOS `~/Library/Application Support/Kiniwolf`; Linux `$XDG_DATA_HOME/Kiniwolf` or `~/.local/share/Kiniwolf`. WKWebView manages website storage through macOS rather than the Windows-style profile directory.
+
+`.github/workflows/installers.yml` builds and tests on all four runners when pushing to `master`. Artifacts are available under GitHub Actions. Pushing a version tag matching Cargo.toml (for example `v0.1.0`) publishes all installers and SHA-256 checksums to GitHub Releases after every platform succeeds.
+
+Local packaging after `cargo build --release --locked`:
+
+```sh
+bash packaging/linux/package.sh 0.1.0
+bash packaging/macos/package.sh 0.1.0
+```
+
+For Windows, install Inno Setup 6, place Microsoft's WebView2 bootstrapper at `dist/MicrosoftEdgeWebview2Setup.exe`, then compile `packaging/windows/setup.iss` with `ISCC /DAppVersion=0.1.0`. The GitHub workflow performs these steps automatically.
 
 ## Commands
 
