@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Popup child</title>
+<body><h1>Test popup</h1><p id="result"></p>
+<script>
+if (window.opener) {
+  window.opener.postMessage('popup-connected', location.origin);
+  document.getElementById('result').textContent = 'PASS: opener exists';
+} else {
+  document.getElementById('result').textContent = 'FAIL: missing opener';
+}
+</script></body></html>

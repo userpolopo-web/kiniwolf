@@ -13,7 +13,9 @@ pub enum BrowserCommand {
 pub fn parse_browser_command(_message: &str) -> Option<BrowserCommand> {
     let message: RawBrowserCommand = serde_json::from_str(_message).ok()?;
     match message.command_type.as_str() {
-        "navigate" => normalize_navigation_input(message.value.as_deref()?).map(BrowserCommand::Navigate),
+        "navigate" => {
+            normalize_navigation_input(message.value.as_deref()?).map(BrowserCommand::Navigate)
+        }
         "back" => Some(BrowserCommand::Back),
         "forward" => Some(BrowserCommand::Forward),
         "reload" => Some(BrowserCommand::Reload),
@@ -111,8 +113,14 @@ mod tests {
             parse_browser_command(r#"{"type":"navigate","value":"example.com"}"#),
             Some(BrowserCommand::Navigate("https://example.com/".to_string()))
         );
-        assert_eq!(parse_browser_command(r#"{"type":"navigate","value":"   "}"#), None);
-        assert_eq!(parse_browser_command(r#"{"type":"back"}"#), Some(BrowserCommand::Back));
+        assert_eq!(
+            parse_browser_command(r#"{"type":"navigate","value":"   "}"#),
+            None
+        );
+        assert_eq!(
+            parse_browser_command(r#"{"type":"back"}"#),
+            Some(BrowserCommand::Back)
+        );
         assert_eq!(
             parse_browser_command(r#"{"type":"forward"}"#),
             Some(BrowserCommand::Forward)
@@ -121,6 +129,9 @@ mod tests {
             parse_browser_command(r#"{"type":"reload"}"#),
             Some(BrowserCommand::Reload)
         );
-        assert_eq!(parse_browser_command(r#"{"type":"home"}"#), Some(BrowserCommand::Home));
+        assert_eq!(
+            parse_browser_command(r#"{"type":"home"}"#),
+            Some(BrowserCommand::Home)
+        );
     }
 }

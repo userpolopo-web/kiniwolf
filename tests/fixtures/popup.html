@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Popup regression</title>
+<body>
+<h1>Popup communication test</h1>
+<button id="open">Open test popup</button>
+<p id="result">WAITING</p>
+<script>
+window.addEventListener('message', event => {
+  if (event.origin === location.origin && event.data === 'popup-connected') {
+    document.getElementById('result').textContent = 'PASS: opener communication preserved';
+  }
+});
+document.getElementById('open').onclick = () => {
+  const child = window.open('about:blank', 'test-popup', 'width=480,height=360');
+  if (!child) {
+    document.getElementById('result').textContent = 'FAIL: popup was canceled';
+    return;
+  }
+  child.location.href = './popup-child.html';
+};
+</script></body></html>

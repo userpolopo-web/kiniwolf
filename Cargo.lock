@@ -1058,6 +1058,8 @@ dependencies = [
  "serde_json",
  "tao",
  "url",
+ "webview2-com",
+ "windows-core",
  "wry",
 ]
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-home="{{HOME_URL}}">
+<html lang="pt-BR" data-home="{{HOME_URL}}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,11 @@
 </head>
 <body>
   <main class="browser-shell" data-home="{{HOME_URL}}">
+    <nav class="tabbar" aria-label="Abas">
+      <div id="tabs" role="tablist"></div>
+      <button id="new-tab" class="icon-button" title="Nova aba" aria-label="Nova aba">+</button>
+      <button id="settings-button" class="icon-button" title="Configuracoes" aria-label="Configuracoes">⚙</button>
+    </nav>
     <form class="toolbar" id="toolbar" autocomplete="off">
       <button class="icon-button" id="back" type="button" title="Back" aria-label="Back">‹</button>
       <button class="icon-button" id="forward" type="button" title="Forward" aria-label="Forward">›</button>
@@ -17,6 +22,11 @@
       <input id="address" name="address" type="text" spellcheck="false" placeholder="Search or enter address">
       <button class="go-button" id="go" type="submit">Go</button>
     </form>
+    <section id="settings" hidden aria-label="Configuracoes">
+      <label><span>Economia de memoria</span><input id="memory-saver" type="checkbox" role="switch"></label>
+      <label><span>Salvar senhas e preencher contas</span><input id="save-passwords" type="checkbox" role="switch"></label>
+      <output id="status" role="status"></output>
+    </section>
   </main>
   <!-- shell.js -->
   <script>{{SCRIPT}}</script>

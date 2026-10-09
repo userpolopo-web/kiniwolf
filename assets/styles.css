@@ -18,15 +18,17 @@ body {
 
 body {
   background: #050505;
+  overflow: hidden;
 }
 
 .browser-shell {
-  height: 52px;
+  height: 100%;
   display: block;
   background: #050505;
 }
 
 .toolbar {
+  height: 52px;
   display: grid;
   grid-template-columns: 36px 36px 36px 36px minmax(120px, 1fr) 52px;
   gap: 8px;
@@ -78,7 +80,7 @@ input:focus {
   .toolbar {
     grid-template-columns: 32px 32px 32px 32px minmax(72px, 1fr) 42px;
     gap: 5px;
-    padding: 6px;
+    padding: 8px 6px;
   }
 
   button,
@@ -86,3 +88,18 @@ input:focus {
     height: 34px;
   }
 }
+
+.tabbar { height: 42px; display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: #080808; }
+.tabbar > button { width: 32px; height: 32px; flex-shrink: 0; }
+#tabs { display: flex; gap: 4px; overflow-x: auto; flex: 1; min-width: 0; height: 34px; scrollbar-width: thin; }
+.tab { display: flex; align-items: center; flex: 0 0 190px; max-width: 220px; min-width: 100px; background: #151515; border: 1px solid #292929; border-radius: 6px 6px 0 0; }
+.tab.active { background: #333; border-color: #666; }
+.tab.suspended { color: #999; }
+.tab .select { background: transparent; border: 0; flex: 1; text-align: left; height: 30px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; }
+.tab .close { border: 0; background: transparent; width: 28px; height: 28px; flex-shrink: 0; }
+button:focus-visible { outline: 2px solid white; outline-offset: -2px; }
+#settings { padding: 14px 18px; height: 156px; border-bottom: 1px solid #444; background: #191919; }
+#settings[hidden] { display: none; }
+#settings label { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 42px; font-size: 14px; }
+#settings input { width: 18px; height: 18px; accent-color: #aaa; flex-shrink: 0; }
+#status { display: block; font-size: 12px; color: #ccc; margin-top: 10px; }
