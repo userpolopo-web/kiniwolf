@@ -1,4 +1,33 @@
+use serde::Deserialize;
 use url::Url;
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum BrowserCommand {
+    Navigate(String),
+    Back,
+    Forward,
+    Reload,
+    Home,
+}
+
+pub fn parse_browser_command(_message: &str) -> Option<BrowserCommand> {
+    let message: RawBrowserCommand = serde_json::from_str(_message).ok()?;
+    match message.command_type.as_str() {
+        "navigate" => normalize_navigation_input(message.value.as_deref()?).map(BrowserCommand::Navigate),
+        "back" => Some(BrowserCommand::Back),
+        "forward" => Some(BrowserCommand::Forward),
+        "reload" => Some(BrowserCommand::Reload),
+        "home" => Some(BrowserCommand::Home),
+        _ => None,
+    }
+}
+
+#[derive(Deserialize)]
+struct RawBrowserCommand {
+    #[serde(rename = "type")]
+    command_type: String,
+    value: Option<String>,
+}
 
 pub fn normalize_navigation_input(input: &str) -> Option<String> {
     let trimmed = input.trim();
@@ -49,7 +78,7 @@ fn encode_query(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::normalize_navigation_input;
+    use super::{normalize_navigation_input, parse_browser_command, BrowserCommand};
 
     #[test]
     fn normalizes_empty_domains_urls_and_search_queries() {
@@ -74,5 +103,24 @@ mod tests {
             normalize_navigation_input("rust webview browser"),
             Some("https://duckduckgo.com/?q=rust%20webview%20browser".to_string())
         );
+    }
+
+    #[test]
+    fn parses_browser_commands_and_rejects_empty_navigation() {
+        assert_eq!(
+            parse_browser_command(r#"{"type":"navigate","value":"example.com"}"#),
+            Some(BrowserCommand::Navigate("https://example.com/".to_string()))
+        );
+        assert_eq!(parse_browser_command(r#"{"type":"navigate","value":"   "}"#), None);
+        assert_eq!(parse_browser_command(r#"{"type":"back"}"#), Some(BrowserCommand::Back));
+        assert_eq!(
+            parse_browser_command(r#"{"type":"forward"}"#),
+            Some(BrowserCommand::Forward)
+        );
+        assert_eq!(
+            parse_browser_command(r#"{"type":"reload"}"#),
+            Some(BrowserCommand::Reload)
+        );
+        assert_eq!(parse_browser_command(r#"{"type":"home"}"#), Some(BrowserCommand::Home));
     }
 }
