@@ -39,6 +39,7 @@ body {
 
 button,
 input {
+  min-width: 0;
   height: 36px;
   border: 1px solid #333333;
   border-radius: 6px;
@@ -64,6 +65,8 @@ input:focus {
 
 .go-button {
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #address,
@@ -115,7 +118,17 @@ input:focus {
 
 @media (max-width: 560px) {
   .toolbar {
-    grid-template-columns: 32px 32px 32px 32px minmax(80px, 1fr) 44px;
+    grid-template-columns: 32px 32px 32px 32px minmax(72px, 1fr) 42px;
     gap: 5px;
+    padding: 6px;
+  }
+
+  button,
+  input {
+    height: 34px;
+  }
+
+  .brand {
+    font-size: 30px;
   }
 }

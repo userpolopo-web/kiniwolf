@@ -61,4 +61,19 @@ window.addEventListener("keydown", (event) => {
     address.focus();
     address.select();
   }
+
+  if (event.altKey && event.key === "ArrowLeft") {
+    event.preventDefault();
+    post({ type: "back" });
+  }
+
+  if (event.altKey && event.key === "ArrowRight") {
+    event.preventDefault();
+    post({ type: "forward" });
+  }
+
+  if (event.ctrlKey && event.key.toLowerCase() === "r") {
+    event.preventDefault();
+    post({ type: "reload" });
+  }
 });
