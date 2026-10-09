@@ -6,6 +6,7 @@ window.showError = message => {
   document.getElementById('status').textContent = message;
 };
 window.renderBrowser = state => {
+  const changedTab = currentTab !== state.active;
   currentTab = state.active;
   const list = document.getElementById('tabs');
   list.replaceChildren();
@@ -26,10 +27,11 @@ window.renderBrowser = state => {
     item.append(select, close); list.append(item);
   }
   const active = state.tabs.find(tab => tab.id === state.active);
-  if (active && document.activeElement !== address) address.value = active.url;
+  if (active && (changedTab || document.activeElement !== address)) address.value = active.url;
   document.getElementById('settings').hidden = !state.panel;
   document.getElementById('settings-button').setAttribute('aria-expanded', String(state.panel));
   document.getElementById('memory-saver').checked = state.settings.memory_saver;
+  document.getElementById('search-engine').value = state.settings.search_engine;
   document.getElementById('save-passwords').checked = state.settings.save_passwords;
   document.getElementById('save-passwords').disabled = !state.passwords_supported;
   document.getElementById('save-passwords').closest('label').hidden = !state.passwords_supported;
@@ -39,6 +41,7 @@ document.getElementById('new-tab').onclick = () => post({type:'new-tab'});
 document.getElementById('settings-button').onclick = () => post({type:'panel'});
 document.getElementById('memory-saver').onchange = event => post({type:'settings', memory_saver:event.target.checked});
 document.getElementById('save-passwords').onchange = event => post({type:'settings', save_passwords:event.target.checked});
+document.getElementById('search-engine').onchange = event => post({type:'settings', search_engine:event.target.value});
 
 function post(command) {
   if (window.ipc && typeof window.ipc.postMessage === "function") {
@@ -47,8 +50,12 @@ function post(command) {
 }
 
 function navigate(value) {
+  if (!value.trim()) return;
+  address.blur();
   post({ type: "navigate", value });
 }
+
+address.addEventListener('focus', () => address.select());
 
 toolbar.addEventListener("submit", (event) => {
   event.preventDefault();

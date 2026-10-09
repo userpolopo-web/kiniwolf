@@ -98,7 +98,8 @@ input:focus {
 .tab .select { background: transparent; border: 0; flex: 1; text-align: left; height: 30px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; }
 .tab .close { border: 0; background: transparent; width: 28px; height: 28px; flex-shrink: 0; }
 button:focus-visible { outline: 2px solid white; outline-offset: -2px; }
-#settings { padding: 14px 18px; height: 156px; border-bottom: 1px solid #444; background: #191919; }
+#settings { padding: 14px 18px; height: 200px; border-bottom: 1px solid #444; background: #191919; }
+#search-engine { min-width: 0; width: 200px; max-width: 55%; height: 34px; padding: 0 8px; border: 1px solid #555; border-radius: 6px; color: #f7f7f7; background: #242424; font: inherit; }
 #settings[hidden] { display: none; }
 #settings label[hidden] { display: none; }
 #settings label { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 42px; font-size: 14px; }

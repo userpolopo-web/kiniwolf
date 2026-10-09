@@ -1,3 +1,4 @@
+use crate::browser::SearchEngine;
 use serde::{Deserialize, Serialize};
 use std::{io, path::PathBuf};
 
@@ -6,6 +7,7 @@ use std::{io, path::PathBuf};
 pub struct Settings {
     pub memory_saver: bool,
     pub save_passwords: bool,
+    pub search_engine: SearchEngine,
 }
 
 impl Default for Settings {
@@ -13,6 +15,7 @@ impl Default for Settings {
         Self {
             memory_saver: false,
             save_passwords: true,
+            search_engine: SearchEngine::default(),
         }
     }
 }
@@ -57,6 +60,10 @@ mod tests {
         let settings: Settings = serde_json::from_str(r#"{"memory_saver":true}"#).unwrap();
         assert!(settings.memory_saver);
         assert!(settings.save_passwords);
+        assert_eq!(
+            settings.search_engine,
+            crate::browser::SearchEngine::DuckDuckGo
+        );
     }
 
     #[test]
@@ -64,10 +71,12 @@ mod tests {
         let original = Settings {
             memory_saver: true,
             save_passwords: false,
+            search_engine: crate::browser::SearchEngine::Bing,
         };
         let restored: Settings =
             serde_json::from_slice(&serde_json::to_vec(&original).unwrap()).unwrap();
         assert!(restored.memory_saver);
         assert!(!restored.save_passwords);
+        assert_eq!(restored.search_engine, original.search_engine);
     }
 }

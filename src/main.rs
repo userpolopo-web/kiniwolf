@@ -21,7 +21,6 @@ use tao::{
     window::{Window, WindowBuilder},
 };
 use wry::{Rect, WebContext, WebView, WebViewBuilder};
-const HOME: &str = "https://duckduckgo.com";
 
 struct WebViewHost {
     window: Window,
@@ -68,12 +67,13 @@ impl WebViewHost {
 #[derive(Debug)]
 enum Message {
     Command(Value),
-    Url(u64, String),
-    Title(u64, String),
+    Url(u64, u64, String),
+    Title(u64, u64, String),
     Focus,
 }
 struct Tab {
     id: u64,
+    generation: u64,
     url: String,
     title: String,
     view: Option<WebView>,
@@ -91,7 +91,7 @@ struct Browser {
 impl Browser {
     fn height(&self) -> u32 {
         if self.panel {
-            250
+            294
         } else {
             94
         }
@@ -118,6 +118,8 @@ impl Browser {
         }
         let tab = self.tabs.iter_mut().find(|t| t.id == id).unwrap();
         if tab.view.is_none() {
+            tab.generation += 1;
+            let generation = tab.generation;
             let nav = proxy.clone();
             let title = proxy.clone();
             let ipc = proxy.clone();
@@ -138,11 +140,11 @@ impl Browser {
                     }
                 })
                 .with_navigation_handler(move |url| {
-                    let _ = nav.send_event(Message::Url(id, url));
+                    let _ = nav.send_event(Message::Url(id, generation, url));
                     true
                 })
                 .with_document_title_changed_handler(move |text| {
-                    let _ = title.send_event(Message::Title(id, text));
+                    let _ = title.send_event(Message::Title(id, generation, text));
                 })
                 .with_new_window_req_handler(move |_| {
                     // A native popup preserves window.opener, postMessage and delayed
@@ -169,6 +171,7 @@ impl Browser {
         self.next += 1;
         self.tabs.push(Tab {
             id,
+            generation: 0,
             url,
             title: "Nova aba".into(),
             view: None,
@@ -199,8 +202,10 @@ impl Browser {
             "new-tab" => self.add(
                 value["url"]
                     .as_str()
-                    .and_then(browser::normalize_navigation_input)
-                    .unwrap_or_else(|| HOME.into()),
+                    .and_then(|input| {
+                        browser::normalize_navigation_input(input, self.settings.search_engine)
+                    })
+                    .unwrap_or_else(|| self.settings.search_engine.home_url().into()),
                 window,
                 proxy,
             )?,
@@ -217,7 +222,7 @@ impl Browser {
                 {
                     let removed = self.tabs.remove(index);
                     if self.tabs.is_empty() {
-                        self.add(HOME.into(), window, proxy)?;
+                        self.add(self.settings.search_engine.home_url().into(), window, proxy)?;
                     } else if removed.id == self.active {
                         let id = self.tabs[index.min(self.tabs.len() - 1)].id;
                         self.activate(id, window, proxy)?;
@@ -237,6 +242,11 @@ impl Browser {
                 if let Some(enabled) = value["save_passwords"].as_bool() {
                     settings.save_passwords = enabled;
                 }
+                if let Some(engine) = value.get("search_engine") {
+                    if let Ok(engine) = serde_json::from_value(engine.clone()) {
+                        settings.search_engine = engine;
+                    }
+                }
                 for tab in &self.tabs {
                     if let Some(view) = &tab.view {
                         configure_passwords(view, settings.save_passwords)?;
@@ -253,17 +263,22 @@ impl Browser {
                 }
             }
             _ => {
-                if let Some(command) = parse_browser_command(&value.to_string()) {
+                if let Some(command) =
+                    parse_browser_command(&value.to_string(), self.settings.search_engine)
+                {
                     if let Some(tab) = self.tabs.iter_mut().find(|t| t.id == self.active) {
                         if let Some(view) = &tab.view {
                             match command {
                                 BrowserCommand::Navigate(url) => {
                                     view.load_url(&url)?;
+                                    view.focus()?;
                                     tab.url = url;
                                 }
                                 BrowserCommand::Home => {
-                                    view.load_url(HOME)?;
-                                    tab.url = HOME.into();
+                                    let home = self.settings.search_engine.home_url();
+                                    view.load_url(home)?;
+                                    view.focus()?;
+                                    tab.url = home.into();
                                 }
                                 BrowserCommand::Back => view.evaluate_script("history.back()")?,
                                 BrowserCommand::Forward => {
@@ -327,9 +342,12 @@ fn main() -> wry::Result<()> {
         .build(&event_loop)
         .expect("create window");
     let window = WebViewHost::new(window);
+    let settings = Settings::load();
     let toolbar_proxy = proxy.clone();
     let toolbar_builder = WebViewBuilder::new()
-        .with_html(assets::browser_shell_html(HOME))
+        .with_html(assets::browser_shell_html(
+            settings.search_engine.home_url(),
+        ))
         .with_bounds(bounds(&window, 94, true))
         .with_ipc_handler(move |request| {
             if let Ok(value) = serde_json::from_str(request.body()) {
@@ -342,11 +360,15 @@ fn main() -> wry::Result<()> {
         tabs: vec![],
         active: 0,
         next: 1,
-        settings: Settings::load(),
+        settings,
         context: WebContext::new(Some(settings::data_dir().join("WebView2"))),
         panel: false,
     };
-    browser.add(HOME.into(), &window, &proxy)?;
+    browser.add(
+        browser.settings.search_engine.home_url().into(),
+        &window,
+        &proxy,
+    )?;
     event_loop.run(move |event, _, flow| {
         *flow = ControlFlow::Wait;
         let result = match event {
@@ -356,11 +378,18 @@ fn main() -> wry::Result<()> {
                 for tab in &browser.tabs { if let Some(view) = &tab.view { let _ = view.set_bounds(bounds(&window,browser.height(),false)); } } Ok(())
             }
             Event::UserEvent(Message::Command(value)) => browser.command(value,&window,&proxy,&toolbar),
-            Event::UserEvent(Message::Url(id,url)) => { if let Some(t) = browser.tabs.iter_mut().find(|t| t.id==id && t.view.is_some()) {t.url=url;} browser.render(&toolbar) }
-            Event::UserEvent(Message::Title(id,title)) => { if let Some(t) = browser.tabs.iter_mut().find(|t| t.id==id && t.view.is_some()) {t.title=title;} browser.render(&toolbar) }
+            Event::UserEvent(Message::Url(id,generation,url)) => { if let Some(t) = browser.tabs.iter_mut().find(|t| t.id==id && t.generation==generation && t.view.is_some()) {t.url=url;} browser.render(&toolbar) }
+            Event::UserEvent(Message::Title(id,generation,title)) => { if let Some(t) = browser.tabs.iter_mut().find(|t| t.id==id && t.generation==generation && t.view.is_some()) {t.title=title;} browser.render(&toolbar) }
             Event::UserEvent(Message::Focus) => { let _ = toolbar.focus(); toolbar.evaluate_script("document.getElementById('address').focus(); document.getElementById('address').select();") }
             _ => Ok(()),
         };
-        if let Err(error) = result { eprintln!("Browser: {error}"); let _ = toolbar.evaluate_script("window.showError('Nao foi possivel concluir esta acao.')"); }
+        if let Err(error) = result {
+            eprintln!("Browser: {error}");
+            browser.panel = true;
+            let _ = toolbar.set_bounds(bounds(&window,browser.height(),true));
+            for tab in &browser.tabs { if let Some(view) = &tab.view { let _ = view.set_bounds(bounds(&window,browser.height(),false)); } }
+            let _ = browser.render(&toolbar);
+            let _ = toolbar.evaluate_script("window.showError('Nao foi possivel concluir esta acao.')");
+        }
     });
 }

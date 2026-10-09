@@ -45,6 +45,8 @@ jobs:
           fi
       - name: Tests
         run: cargo test --locked
+      - name: Toolbar regression tests
+        run: node tests/shell.test.cjs
       - name: Build
         run: cargo build --release --locked
       - name: Linux startup smoke test

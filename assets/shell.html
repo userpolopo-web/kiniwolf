@@ -23,6 +23,11 @@
       <button class="go-button" id="go" type="submit">Go</button>
     </form>
     <section id="settings" hidden aria-label="Configuracoes">
+      <label for="search-engine"><span>Mecanismo de pesquisa</span><select id="search-engine">
+        <option value="google">Google</option>
+        <option value="bing">Bing (Microsoft Edge)</option>
+        <option value="duck_duck_go">DuckDuckGo</option>
+      </select></label>
       <label><span>Economia de memoria</span><input id="memory-saver" type="checkbox" role="switch"></label>
       <label><span>Salvar senhas e preencher contas</span><input id="save-passwords" type="checkbox" role="switch"></label>
       <output id="status" role="status"></output>

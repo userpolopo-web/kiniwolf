@@ -29,21 +29,22 @@ Windows installers are currently unsigned by a publisher certificate. System tru
 
 Profile locations: Windows `%LOCALAPPDATA%\Kiniwolf`; macOS `~/Library/Application Support/Kiniwolf`; Linux `$XDG_DATA_HOME/Kiniwolf` or `~/.local/share/Kiniwolf`. WKWebView manages website storage through macOS rather than the Windows-style profile directory.
 
-`.github/workflows/installers.yml` builds and tests on all four runners for pull requests, manual runs and version tags. Artifacts are available under GitHub Actions. Pushing a version tag matching Cargo.toml (for example `v0.1.0`) publishes all installers and SHA-256 checksums to GitHub Releases after every platform succeeds. Linux also receives a startup test under Xvfb. Windows builds link the C runtime statically to avoid a separate Visual C++ runtime installation.
+`.github/workflows/installers.yml` builds and tests on all four runners for pull requests, manual runs and version tags. Artifacts are available under GitHub Actions. Pushing a version tag matching Cargo.toml (for example `v0.1.1`) publishes all installers and SHA-256 checksums to GitHub Releases after every platform succeeds. Linux also receives a startup test under Xvfb. Windows builds link the C runtime statically to avoid a separate Visual C++ runtime installation.
 
 Local packaging after `cargo build --release --locked`:
 
 ```sh
-bash packaging/linux/package.sh 0.1.0
-bash packaging/macos/package.sh 0.1.0
+bash packaging/linux/package.sh 0.1.1
+bash packaging/macos/package.sh 0.1.1
 ```
 
-For Windows, install Inno Setup 6, place Microsoft's WebView2 bootstrapper at `dist/MicrosoftEdgeWebview2Setup.exe`, then compile `packaging/windows/setup.iss` with `ISCC /DAppVersion=0.1.0`. The GitHub workflow performs these steps automatically.
+For Windows, install Inno Setup 6, place Microsoft's WebView2 bootstrapper at `dist/MicrosoftEdgeWebview2Setup.exe`, then compile `packaging/windows/setup.iss` with `ISCC /DAppVersion=0.1.1`. The GitHub workflow performs these steps automatically.
 
 ## Commands
 
 ```powershell
 cargo test
+node tests/shell.test.cjs
 cargo check
 cargo run
 ```
@@ -61,6 +62,10 @@ cargo run
 ## Notes
 
 The toolbar and each loaded tab use native WebViews. Use the gear button to change settings.
+
+The search engine selector offers Google, Bing (the default search engine in Microsoft Edge), and DuckDuckGo. Your choice is saved locally and applies to address-bar searches, new tabs and the Home button. Changing it does not navigate existing tabs or change the browser engine.
+
+Version 0.1.1 selects the existing address on focus, displays the actual destination after a search, refreshes the address when switching tabs, and ignores delayed navigation/title events from destroyed WebViews. Ordinary searches were verified with Google and DuckDuckGo; website-specific HTTP errors and embedded-browser sign-in restrictions can still occur.
 
 Memory saver is optional and off by default. When enabled, switching tabs destroys the inactive page's WebView. Only its title and URL remain in memory; selecting it recreates and reloads the page. This reduces memory, but does not promise zero RAM. Page history, scroll, unsaved forms, downloads, audio and ongoing page work may be lost or interrupted. With memory saver off, visited tabs stay loaded in the background. Disabling memory saver does not immediately reload already suspended tabs.
 
